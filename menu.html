@@ -84,6 +84,23 @@
     .info-bar{min-height:58px;border-radius:17px;border:1px solid rgba(113,233,255,.18);background:linear-gradient(90deg, rgba(18,131,231,.22), rgba(162,124,255,.12));display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;margin-top:18px;padding:12px 16px;text-align:center}
     .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);padding:12px 18px;border-radius:14px;background:rgba(7,12,26,.94);border:1px solid rgba(255,255,255,.1);opacity:0;pointer-events:none;transition:.2s ease;z-index:50}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    .guide-overlay,.event-overlay{position:fixed;inset:0;background:rgba(2,6,18,.72);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:28px;z-index:70}
+    .guide-overlay.show,.event-overlay.show{display:flex}
+    .guide-card,.event-card{width:min(860px,94vw);background:linear-gradient(180deg, rgba(10,18,42,.96), rgba(4,9,22,.96));border:1px solid rgba(113,233,255,.2);border-radius:28px;box-shadow:0 30px 90px rgba(0,0,0,.42);padding:30px 30px 24px;position:relative}
+    .guide-kicker,.event-kicker{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;background:rgba(113,233,255,.08);border:1px solid rgba(113,233,255,.16);font-size:13px;font-weight:800;color:var(--cyan);margin-bottom:16px}
+    .guide-heading,.event-heading{font-size:38px;font-weight:900;margin-bottom:12px}
+    .guide-sub,.event-sub{font-size:16px;line-height:1.9;color:rgba(255,255,255,.78);margin-bottom:18px}
+    .guide-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:18px}
+    .guide-step{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px 18px 16px}
+    .guide-step .num{font-size:13px;font-weight:900;color:var(--gold);letter-spacing:1px;margin-bottom:8px}
+    .guide-step .title{font-size:22px;font-weight:900;margin-bottom:6px}
+    .guide-step .desc{font-size:15px;line-height:1.85;color:rgba(255,255,255,.74)}
+    .guide-missing,.event-note{min-height:48px;border-radius:16px;border:1px solid rgba(255,216,107,.18);background:rgba(255,216,107,.08);display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 14px;font-size:15px;color:#fff;margin-bottom:14px}
+    .guide-tip,.event-tip{font-size:14px;color:rgba(255,255,255,.58);text-align:center}
+    .guide-actions,.event-actions{display:flex;justify-content:center;margin-top:16px}
+    .guide-close-btn,.event-close-btn{min-width:180px;height:52px;padding:0 22px;border-radius:16px;border:none;cursor:pointer;background:linear-gradient(90deg,var(--blue),var(--violet));color:#fff;font-size:16px;font-weight:900;box-shadow:0 10px 24px rgba(26,141,255,.22)}
+    .guide-close-btn:hover,.event-close-btn:hover{transform:translateY(-1px)}
     .rule-list{margin:12px 0 0;padding-left:18px;color:rgba(255,255,255,.78);font-size:15px;line-height:1.9}
     @media (max-width:1700px){body{min-width:0}.shell{grid-template-columns:1fr;max-width:1240px}.side-panel{min-height:auto}.audio-panel{position:absolute}}
   </style>
@@ -212,6 +229,35 @@
         <div class="skill-desc" id="enemyActiveDesc">等待同步。</div>
       </div>
     </aside>
+  </div>
+
+
+  <div id="guideOverlay" class="guide-overlay show" role="dialog" aria-modal="true" aria-labelledby="guideHeading">
+    <div id="guideCard" class="guide-card">
+      <div class="guide-kicker">操作提示</div>
+      <div id="guideHeading" class="guide-heading">先照順序做，流程才會正常。</div>
+      <div id="guideSub" class="guide-sub">先完成陣營與角色選擇，再建立房間或輸入房號加入，最後按下準備就緒。</div>
+      <div class="guide-steps">
+        <div class="guide-step"><div class="num">STEP 1</div><div class="title">先選陣營</div><div class="desc">先選光或暗。沒有陣營時，系統不會讓你建房或加入房間。</div></div>
+        <div class="guide-step"><div class="num">STEP 2</div><div class="title">再選角色</div><div class="desc">騎士、刺客、法師擇一。選好後，左右角色資訊才會開始顯示。</div></div>
+        <div class="guide-step"><div class="num">STEP 3</div><div class="title">建立或加入房間</div><div class="desc">房主建立房間，另一位玩家輸入房號加入。沒有先選完前置項目，按鍵會被擋下。</div></div>
+        <div class="guide-step"><div class="num">STEP 4</div><div class="title">最後按準備</div><div class="desc">雙方都準備完成後，房主才能按下開始，進入下一階段。</div></div>
+      </div>
+      <div id="guideMissing" class="guide-missing">現在先完成：選擇陣營、選擇角色。</div>
+      <div class="guide-tip">如果你操作順序錯誤，這個提示會再次跳出。</div>
+      <div class="guide-actions"><button id="guideCloseBtn" class="guide-close-btn" type="button">我知道了，關閉提示</button></div>
+    </div>
+  </div>
+
+  <div id="eventOverlay" class="event-overlay" role="dialog" aria-modal="true" aria-labelledby="eventHeading">
+    <div class="event-card">
+      <div class="event-kicker">房間事件</div>
+      <div id="eventHeading" class="event-heading">房間狀態已更新</div>
+      <div id="eventSub" class="event-sub">系統偵測到房間內有玩家離線或房間已失效。</div>
+      <div id="eventNote" class="event-note">請依照提示進行下一步。</div>
+      <div class="event-tip">按下方按鈕後，會回到目前可操作的菜單狀態。</div>
+      <div class="event-actions"><button id="eventCloseBtn" class="event-close-btn" type="button">我知道了</button></div>
+    </div>
   </div>
 
   <div id="toast" class="toast"></div>
