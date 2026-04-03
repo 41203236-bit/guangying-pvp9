@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-import { getDatabase, ref, get, set, update, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js';
+import { getDatabase, ref, get, set, update, onValue, remove, onDisconnect } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js';
 import { firebaseConfig } from './firebase-config.js';
 
 const app = initializeApp(firebaseConfig);
@@ -59,7 +59,6 @@ const els = {
   mySlotChip: $('mySlotChip'), myRoleName: $('myRoleName'), myRoleSub: $('myRoleSub'), myRoleImage: $('myRoleImage'), myRolePlaceholder: $('myRolePlaceholder'), myPassiveName: $('myPassiveName'), myPassiveDesc: $('myPassiveDesc'), myActiveName: $('myActiveName'), myActiveDesc: $('myActiveDesc'),
   enemySlotChip: $('enemySlotChip'), enemyRoleName: $('enemyRoleName'), enemyRoleSub: $('enemyRoleSub'), enemyRoleImage: $('enemyRoleImage'), enemyRolePlaceholder: $('enemyRolePlaceholder'), enemyPassiveName: $('enemyPassiveName'), enemyPassiveDesc: $('enemyPassiveDesc'), enemyActiveName: $('enemyActiveName'), enemyActiveDesc: $('enemyActiveDesc'),
   playerOneName: $('playerOneName'), playerOneMeta: $('playerOneMeta'), playerOneState: $('playerOneState'), playerTwoName: $('playerTwoName'), playerTwoMeta: $('playerTwoMeta'), playerTwoState: $('playerTwoState'),
-  guideOverlay: $('guideOverlay'), guideCard: $('guideCard'), guideSub: $('guideSub'), guideMissing: $('guideMissing'), guideCloseBtn: $('guideCloseBtn'),
   toast: $('toast')
 };
 const roleCards = [...document.querySelectorAll('.role-card')];
@@ -75,6 +74,7 @@ let currentRoomCode = localStorage.getItem(STORAGE.roomCode) || '';
 let currentSlot = localStorage.getItem(STORAGE.slot) || '';
 let roomUnsub = null;
 let roomData = null;
+let disconnectCleanup = null;
 
 if (!playerName) {
   location.href = 'entry_page_v4_centered_layout.html';
@@ -111,6 +111,27 @@ function showToast(message){
 }
 function setStatus(message){ els.statusBar.textContent = message; }
 function roomRef(code){ return ref(db, `rooms/${code}`); }
+
+function clearDisconnectHandler(){
+  if (disconnectCleanup) {
+    disconnectCleanup().catch(()=>{});
+    disconnectCleanup = null;
+  }
+}
+
+async function setupDisconnectHandler(code, slot){
+  clearDisconnectHandler();
+  if (!code || !slot) return;
+  const targetRef = slot === 'O' ? roomRef(code) : ref(db, `rooms/${code}/${playerPath(slot)}`);
+  const disconnectAction = onDisconnect(targetRef);
+  if (slot === 'O') {
+    await disconnectAction.remove();
+  } else {
+    await disconnectAction.update({ joined:false, name:'', faction:'', role:'', ready:false, clientId:'' });
+  }
+  disconnectCleanup = () => disconnectAction.cancel();
+}
+
 function codeGen(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
 function playerPath(slot, key=''){ return `players/${slot}${key ? '/' + key : ''}`; }
 function formatState(joined, ready){ if(!joined) return ['未加入', 'bad']; if(ready) return ['已準備', 'ok']; return ['未準備', 'warn']; }
@@ -224,37 +245,6 @@ function render(){
   else setStatus('雙方已準備完成，房主可以按下開始。');
 }
 
-
-function getMissingSteps(){
-  const missing=[];
-  if (!selectedFaction) missing.push('選擇陣營');
-  if (!selectedRole) missing.push('選擇角色');
-  return missing;
-}
-
-function showGuide(reason=''){
-  const missing = getMissingSteps();
-  let text = '現在先完成：';
-  if (missing.length) text += missing.join('、');
-  else text += '建立房間或輸入房號加入，再按下準備就緒。';
-  if (reason) text = `${reason}｜${text}`;
-  els.guideMissing.textContent = text;
-  els.guideOverlay.classList.add('show');
-}
-
-function hideGuide(){
-  els.guideOverlay.classList.remove('show');
-}
-
-function requireSetup(actionLabel){
-  const missing = getMissingSteps();
-  if (!missing.length) return true;
-  const reason = `你還不能${actionLabel}，因為尚未完成：${missing.join('、')}`;
-  setStatus(reason);
-  showGuide(reason);
-  return false;
-}
-
 function cleanupSubscription(){
   if (roomUnsub) { roomUnsub(); roomUnsub = null; }
 }
@@ -262,15 +252,36 @@ function cleanupSubscription(){
 function subscribeRoom(code){
   cleanupSubscription();
   roomUnsub = onValue(roomRef(code), async (snap)=>{
+    const prev = roomData;
     const data = snap.val();
     if (!data) {
+      const wasHost = currentSlot === 'O';
       roomData = null; currentRoomCode = ''; currentSlot = '';
       localStorage.removeItem(STORAGE.roomCode); localStorage.removeItem(STORAGE.slot);
-      render(); setStatus('房間不存在或已被刪除。');
+      clearDisconnectHandler();
+      render();
+      const msg = wasHost ? '房間已關閉。' : '房主已離開房間，請重新建立或加入其他房間。';
+      setStatus(msg);
+      showToast(msg);
       return;
     }
     roomData = data;
     const me = data.players?.[currentSlot];
+    const foeSlot = otherSlot(currentSlot);
+    const prevFoe = prev?.players?.[foeSlot];
+    const foe = data.players?.[foeSlot];
+    if (prev && prevFoe?.joined && !foe?.joined) {
+      const msg = currentSlot === 'O' ? '對手已離開房間，你可以等待新玩家加入或重新建房。' : '房主已離開房間，請重新建立或加入其他房間。';
+      setStatus(msg);
+      showToast(msg);
+      if (currentSlot !== 'O') {
+        roomData = null; currentRoomCode = ''; currentSlot = '';
+        localStorage.removeItem(STORAGE.roomCode); localStorage.removeItem(STORAGE.slot);
+        clearDisconnectHandler();
+        render();
+        return;
+      }
+    }
     if (me?.clientId === playerId && (!me.name || me.faction !== selectedFaction || me.role !== selectedRole) && !me.ready) {
       await syncMySelection();
       return;
@@ -280,7 +291,7 @@ function subscribeRoom(code){
 }
 
 async function createRoom(){
-  if (!requireSetup('建立房間')) return;
+  if (!selectedFaction || !selectedRole) { setStatus('先選擇光 / 暗與角色，再建立房間。'); return; }
   cleanupSubscription();
   currentRoomCode = codeGen();
   currentSlot = 'O';
@@ -296,6 +307,7 @@ async function createRoom(){
     }
   };
   await set(roomRef(currentRoomCode), roomData);
+  await setupDisconnectHandler(currentRoomCode, currentSlot);
   subscribeRoom(currentRoomCode);
   render();
   showToast('新房間已建立');
@@ -303,7 +315,7 @@ async function createRoom(){
 
 async function joinRoom(){
   const code = els.roomInput.value.trim().toUpperCase();
-  if (!requireSetup('加入房間')) return;
+  if (!selectedFaction || !selectedRole) { setStatus('先選擇光 / 暗與角色，再加入房間。'); return; }
   if (!code) { setStatus('請先輸入房號。'); return; }
   const snap = await get(roomRef(code));
   if (!snap.exists()) { setStatus('找不到這個房間。'); return; }
@@ -316,6 +328,7 @@ async function joinRoom(){
   await update(roomRef(currentRoomCode), {
     [playerPath(currentSlot)]: { joined:true, name:playerName, faction:selectedFaction, role:selectedRole, ready:false, clientId:playerId }
   });
+  await setupDisconnectHandler(currentRoomCode, currentSlot);
   subscribeRoom(currentRoomCode);
   showToast('加入房間成功');
 }
@@ -324,7 +337,7 @@ async function toggleReady(){
   if (!currentRoomCode || !currentSlot || !roomData) return;
   const me = roomData.players?.[currentSlot];
   if (!me?.joined) return;
-  if (!requireSetup('準備')) return;
+  if (!selectedFaction || !selectedRole) { setStatus('準備前必須先選好陣營與角色。'); return; }
   await update(roomRef(currentRoomCode), {
     [playerPath(currentSlot, 'faction')]: selectedFaction,
     [playerPath(currentSlot, 'role')]: selectedRole,
@@ -340,6 +353,7 @@ async function leaveRoom(){
   const slot = currentSlot;
   const isHost = roomData?.hostSlot === slot;
   cleanupSubscription();
+  clearDisconnectHandler();
   if (isHost) {
     await remove(roomRef(code));
   } else {
@@ -382,32 +396,9 @@ els.copyBtn.addEventListener('click', async ()=>{
   await navigator.clipboard.writeText(currentRoomCode); showToast('房號已複製');
 });
 
-
-els.guideOverlay?.addEventListener('click', (e)=>{
-  if (e.target === els.guideOverlay) hideGuide();
-});
-els.guideCard?.addEventListener('click', (e)=>{
-  e.stopPropagation();
-});
-els.guideCloseBtn?.addEventListener('click', (e)=>{
-  e.preventDefault();
-  e.stopPropagation();
-  hideGuide();
-});
-document.addEventListener('keydown', (e)=>{
-  if (e.key === 'Escape' && els.guideOverlay?.classList.contains('show')) hideGuide();
-});
-
 function init(){
   els.playerNameText.textContent = playerName;
-  showGuide();
   updateFactionUi(); updateRoleUi(); updateRolePanel('my', selectedRole, selectedFaction); render();
   if (currentRoomCode && currentSlot) subscribeRoom(currentRoomCode);
 }
 init();
-
-
-els.guideCloseBtn?.addEventListener('click', hideGuide);
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && els.guideOverlay.classList.contains('show')) hideGuide();
-});
