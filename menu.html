@@ -27,10 +27,10 @@
     .audio-row{display:grid;grid-template-columns:32px 1fr 34px;gap:8px;align-items:center;margin:6px 0;font-size:12px;color:var(--muted)}
     input[type="range"]{width:100%}
 
-    .shell{max-width:1940px;margin:18px auto;padding:0 28px 36px;display:grid;grid-template-columns:460px minmax(980px,1fr) 460px;gap:34px;align-items:start}
+    .shell{max-width:1960px;margin:18px auto;padding:0 24px 30px 18px;display:grid;grid-template-columns:460px minmax(980px,1fr) 460px;gap:30px;align-items:start;position:relative;left:-12px}
     .side-panel,.center-shell{background:linear-gradient(180deg, rgba(7,14,32,.82), rgba(4,8,20,.92));border:1px solid rgba(113,233,255,.14);border-radius:28px;box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.03)}
     .side-panel{padding:30px;min-height:1020px}
-    .center-shell{padding:34px 36px 38px}
+    .center-shell{padding:32px 34px 28px;min-height:1040px}
     .panel-title{font-size:32px;font-weight:900;display:flex;align-items:center;gap:10px;margin-bottom:14px}
     .panel-title::before{content:"";width:5px;height:28px;border-radius:999px;background:linear-gradient(180deg,var(--cyan),var(--gold))}
     .role-chip,.enemy-chip,.slot-chip{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:rgba(255,216,107,.08);border:1px solid rgba(255,216,107,.18);font-size:13px;color:var(--gold);font-weight:700}
@@ -47,8 +47,8 @@
     .eyebrow{display:inline-flex;padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-size:12px;color:rgba(255,255,255,.62);letter-spacing:2px}
     .game-title{font-size:102px;line-height:1;font-weight:900;letter-spacing:6px;margin:18px 0 10px;background:linear-gradient(90deg,#f9feff 0%, #7bf0ff 25%, #ffd86b 58%, #a27cff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
     .subtitle{text-align:center;color:var(--muted);font-size:20px;margin-bottom:24px}
-    .inner-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:stretch}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:24px;min-height:100%;display:flex;flex-direction:column}
+    .inner-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:26px;align-items:start}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:22px;min-height:100%;display:flex;flex-direction:column}
     .small-hint{font-size:16px;color:var(--muted);margin:10px 0 16px}
     .controls{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;margin:16px 0}
     .btn,.ghost-btn,.copy-btn,.role-card,.faction-pill{border:none;outline:none;cursor:pointer;transition:.18s ease;font-family:inherit}
@@ -62,28 +62,28 @@
     .faction-pill.active.light{background:linear-gradient(90deg,#1560a8,#1f8cff);border-color:rgba(113,233,255,.4)}
     .faction-pill.active.dark{background:linear-gradient(90deg,#2a2d54,#6540ff);border-color:rgba(162,124,255,.4)}
 
-    .role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
-    .role-card{padding:16px 14px;border-radius:22px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.12);color:#fff;text-align:center;min-height:184px}
+    .role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+    .role-card{padding:12px 10px;border-radius:20px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.12);color:#fff;text-align:center;min-height:156px}
     .role-card.active{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.12) inset, 0 0 22px rgba(113,233,255,.14)}
-    .role-thumb{width:118px;height:118px;border-radius:20px;overflow:hidden;margin:0 auto 10px;border:1px solid rgba(255,255,255,.08)}
+    .role-thumb{width:92px;height:92px;border-radius:18px;overflow:hidden;margin:0 auto 8px;border:1px solid rgba(255,255,255,.08)}
     .role-thumb img{width:100%;height:100%;object-fit:cover}
-    .role-label{font-size:26px;font-weight:900;margin-bottom:6px}
-    .role-mini{font-size:15px;color:var(--muted)}
+    .role-label{font-size:20px;font-weight:900;margin-bottom:4px}
+    .role-mini{font-size:13px;color:var(--muted)}
 
     .status-title{font-size:24px;font-weight:800;margin-bottom:16px}
-    .status-card{padding:24px 24px 26px}
-    .room-code{display:inline-block;font-size:clamp(48px,4.4vw,72px);letter-spacing:2px;color:var(--gold);font-weight:900;margin:6px 0 10px;word-break:keep-all;line-height:1.05}
+    .status-card{padding:22px 22px 24px}
+    .room-code{display:inline-block;font-size:clamp(34px,3vw,52px);letter-spacing:1px;color:var(--gold);font-weight:900;margin:4px 0 8px;word-break:keep-all;line-height:1.08}
     .status-sub{font-size:16px;color:var(--muted);margin-bottom:16px}
-    .players-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
-    .player-box{min-height:154px;border-radius:22px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:20px}
+    .players-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+    .player-box{min-height:146px;border-radius:22px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:18px}
     .player-box .top{font-size:24px;font-weight:900;margin-bottom:10px}
     .player-box .name{font-size:22px;font-weight:800}
     .player-box .meta{font-size:15px;color:var(--muted);line-height:1.8}
     .state{font-weight:800}
     .state.ok{color:var(--ok)} .state.warn{color:var(--warn)} .state.bad{color:var(--bad)}
-    .status-actions{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
-    .status-actions .btn,.status-actions .ghost-btn,.status-actions .copy-btn{width:100%}
-    .start-row{margin-top:16px}
+    .status-actions{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+    .status-actions .btn,.status-actions .ghost-btn,.status-actions .copy-btn{width:100%;height:60px;font-size:17px;border-radius:18px}
+    .start-row{margin-top:14px}
     .start-row .ghost-btn,.start-row .btn{width:100%;height:62px;border-radius:18px;font-size:18px;font-weight:900}
     .ghost-btn.start-ready{background:linear-gradient(90deg,#12a851,#21d07a);border:1px solid rgba(115,255,180,.42);color:#fff;box-shadow:0 12px 26px rgba(18,168,81,.24)}
     .ghost-btn.start-ready:hover{transform:translateY(-1px)}
@@ -108,7 +108,7 @@
     .guide-close-btn,.event-close-btn{min-width:180px;height:52px;padding:0 22px;border-radius:16px;border:none;cursor:pointer;background:linear-gradient(90deg,var(--blue),var(--violet));color:#fff;font-size:16px;font-weight:900;box-shadow:0 10px 24px rgba(26,141,255,.22)}
     .guide-close-btn:hover,.event-close-btn:hover{transform:translateY(-1px)}
     .rule-list{margin:12px 0 0;padding-left:18px;color:rgba(255,255,255,.78);font-size:15px;line-height:1.9}
-    @media (max-width:1700px){body{min-width:0}.shell{grid-template-columns:1fr;max-width:1240px}.side-panel{min-height:auto}.audio-panel{position:absolute}}
+    @media (max-width:1700px){body{min-width:0}.shell{grid-template-columns:1fr;max-width:1240px;left:0;padding:0 18px 24px}.side-panel{min-height:auto}.center-shell{min-height:auto}.audio-panel{position:absolute}}
   </style>
 </head>
 <body class="bg-grid">
