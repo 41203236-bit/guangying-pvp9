@@ -47,8 +47,8 @@
     .eyebrow{display:inline-flex;padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-size:12px;color:rgba(255,255,255,.62);letter-spacing:2px}
     .game-title{font-size:102px;line-height:1;font-weight:900;letter-spacing:6px;margin:18px 0 10px;background:linear-gradient(90deg,#f9feff 0%, #7bf0ff 25%, #ffd86b 58%, #a27cff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
     .subtitle{text-align:center;color:var(--muted);font-size:20px;margin-bottom:24px}
-    .inner-grid{display:grid;grid-template-columns:1.18fr 1fr;gap:28px}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:24px}
+    .inner-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:stretch}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:24px;min-height:100%;display:flex;flex-direction:column}
     .small-hint{font-size:16px;color:var(--muted);margin:10px 0 16px}
     .controls{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;margin:16px 0}
     .btn,.ghost-btn,.copy-btn,.role-card,.faction-pill{border:none;outline:none;cursor:pointer;transition:.18s ease;font-family:inherit}
@@ -71,7 +71,8 @@
     .role-mini{font-size:15px;color:var(--muted)}
 
     .status-title{font-size:24px;font-weight:800;margin-bottom:16px}
-    .room-code{font-size:72px;letter-spacing:4px;color:var(--gold);font-weight:900;margin:6px 0 10px}
+    .status-card{padding:24px 24px 26px}
+    .room-code{display:inline-block;font-size:clamp(48px,4.4vw,72px);letter-spacing:2px;color:var(--gold);font-weight:900;margin:6px 0 10px;word-break:keep-all;line-height:1.05}
     .status-sub{font-size:16px;color:var(--muted);margin-bottom:16px}
     .players-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
     .player-box{min-height:154px;border-radius:22px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:20px}
@@ -80,8 +81,13 @@
     .player-box .meta{font-size:15px;color:var(--muted);line-height:1.8}
     .state{font-weight:800}
     .state.ok{color:var(--ok)} .state.warn{color:var(--warn)} .state.bad{color:var(--bad)}
-    .action-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px}
-    .info-bar{min-height:58px;border-radius:17px;border:1px solid rgba(113,233,255,.18);background:linear-gradient(90deg, rgba(18,131,231,.22), rgba(162,124,255,.12));display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;margin-top:18px;padding:12px 16px;text-align:center}
+    .status-actions{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+    .status-actions .btn,.status-actions .ghost-btn,.status-actions .copy-btn{width:100%}
+    .start-row{margin-top:16px}
+    .start-row .ghost-btn,.start-row .btn{width:100%;height:62px;border-radius:18px;font-size:18px;font-weight:900}
+    .ghost-btn.start-ready{background:linear-gradient(90deg,#12a851,#21d07a);border:1px solid rgba(115,255,180,.42);color:#fff;box-shadow:0 12px 26px rgba(18,168,81,.24)}
+    .ghost-btn.start-ready:hover{transform:translateY(-1px)}
+    .info-bar{min-height:64px;border-radius:18px;border:1px solid rgba(113,233,255,.18);background:linear-gradient(90deg, rgba(18,131,231,.22), rgba(162,124,255,.12));display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;margin-top:16px;padding:14px 18px;text-align:center;width:100%}
     .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);padding:12px 18px;border-radius:14px;background:rgba(7,12,26,.94);border:1px solid rgba(255,255,255,.1);opacity:0;pointer-events:none;transition:.2s ease;z-index:50}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -184,7 +190,7 @@
           </div>
         </div>
 
-        <div class="card">
+        <div class="card status-card">
           <div class="panel-title" style="font-size:18px">目前狀態</div>
           <div class="status-title">房號：<span class="room-code" id="roomCodeText">未建立</span></div>
           <div class="status-sub">你的身分：<span id="roomRoleText">尚未加入房間</span></div>
@@ -202,9 +208,11 @@
               <div class="state bad" id="playerTwoState">未加入</div>
             </div>
           </div>
-          <div class="action-row">
+          <div class="status-actions">
             <button id="readyBtn" class="btn" disabled>準備就緒</button>
             <button id="leaveBtn" class="ghost-btn" disabled>離開房間</button>
+          </div>
+          <div class="start-row">
             <button id="startBtn" class="ghost-btn" disabled>房主開始</button>
           </div>
           <div id="statusBar" class="info-bar">請先選擇陣營與角色，再建立或加入房間。</div>

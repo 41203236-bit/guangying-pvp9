@@ -249,7 +249,7 @@ function render(){
   if (!roomData || !currentRoomCode) {
     els.roomCodeText.textContent = '未建立';
     els.roomRoleText.textContent = '尚未加入房間';
-    els.copyBtn.disabled = true; els.readyBtn.disabled = true; els.leaveBtn.disabled = true; els.startBtn.disabled = true;
+    els.copyBtn.disabled = true; els.readyBtn.disabled = true; els.leaveBtn.disabled = true; els.startBtn.disabled = true; els.startBtn.classList.remove('start-ready');
     renderPlayerBox('O', els.playerOneName, els.playerOneMeta, els.playerOneState);
     renderPlayerBox('X', els.playerTwoName, els.playerTwoMeta, els.playerTwoState);
     updateRolePanel('enemy', '', '');
@@ -266,6 +266,7 @@ function render(){
   els.readyBtn.textContent = me.ready ? '取消準備' : '準備就緒';
   const canStart = roomData.hostSlot === currentSlot && roomData.phase === 'lobby' && roomData.players?.O?.joined && roomData.players?.X?.joined && roomData.players?.O?.ready && roomData.players?.X?.ready;
   els.startBtn.disabled = !canStart;
+  els.startBtn.classList.toggle('start-ready', canStart);
 
   renderPlayerBox('O', els.playerOneName, els.playerOneMeta, els.playerOneState);
   renderPlayerBox('X', els.playerTwoName, els.playerTwoMeta, els.playerTwoState);
